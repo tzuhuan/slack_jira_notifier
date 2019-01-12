@@ -8,7 +8,7 @@ CASE_PRIORITY = ["P0", "P1", "P2", "P2", "P3", "P3"]
 CASE_LABEL = ["DSA", "DSM", "DSR", "DSAAS", ""]
 
 ## case_table
-## ID PRIORITY LABEL LATEST_UPDATE_DATE NOTIFY ALREADY_NOTIFIED
+## ID PRIORITY LABEL NOTIFY ALREADY_NOTIFIED
 
 def create_db(db_path):
     need_to_create_table = False
@@ -20,7 +20,13 @@ def create_db(db_path):
     c = db.cursor()
     
     if need_to_create_table:
-        c.execute("CREATE TABLE case_table (ID INT PRIMARY KEY NOT NULL, PRIORITY TEXT NOT NULL, LABEL TEXT NOT NULL, LATEST_UPDATE_DATE TEXT NOT NULL, NOTIFY Boolean NOT NULL, ALREADY_NOTIFIED Boolean NOT NULL);")
+        c.execute('''CREATE TABLE case_table (
+                         id TEXT PRIMARY KEY NOT NULL,
+                         priority TEXT NOT NULL,
+                         label TEXT NOT NULL,
+                         notify Boolean NOT NULL,
+                         already_notified Boolean NOT NULL);
+        ''')
         db.commit()
         
     return db
@@ -41,7 +47,7 @@ def create_testing_db_data(db):
     random.shuffle(id_list)
 
     for i in range(50):
-        data = (id_list[i], get_random_priority(), "", get_random_update_time(), 0)
+        data = (id_list[i], get_random_priority(), "", False, False)
         c.execute("INSERT INTO case_table VALUES (?, ?, ?, ?, ?)", data);
     
     db.commit()
@@ -57,7 +63,7 @@ def test(db):
     case["id"] = random.randint(0, 20)
     case["priority"] = get_random_priority()
     case["label"] = get_random_label()
-    case["update_time"] = get_random_update_time()
+    #case["update_time"] = get_random_update_time()
     print(case)
     
     #case_list_to_check.append(case)    
@@ -76,8 +82,8 @@ def test(db):
         #if case["priority"] == "P0" or case["priority"] == "P1":
         #    notify = True
         
-        data = (case["id"], case["priority"], case["label"], case["update_time"], notify, False)
-        c.execute("INSERT INTO case_table VALUES (?, ?, ?, ?, ?, ?)", data)
+        data = (case["id"], case["priority"], case["label"], notify, False)
+        c.execute("INSERT INTO case_table VALUES (?, ?, ?, ?, ?)", data)
         
         print("add case = {}, priority = {}, label = {}, notify = {}".format(case["id"], case["priority"], case["label"], notify))
     else:
@@ -99,8 +105,8 @@ def main():
     db = create_db(DB_FILEPATH)
     print(db)
     
-    #create_testing_db_data(db)
-    test(db)
+    create_testing_db_data(db)
+    #test(db)
     
     db.close()
     
