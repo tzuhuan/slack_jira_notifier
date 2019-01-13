@@ -104,14 +104,14 @@ def update_existing_case(db_conn, existing_case, fetched_case):
         logger.info("label changed '{}' -> '{}'".format(existing_case["label"], fetched_case["label"]))
         send_notification = True
     
-    if send_notification:
-        cursor = db_conn.cursor()
-        ## ID URL TITLE PRIORITY LABEL ASSIGNEE NOTIFY ALREADY_NOTIFIED
-        data = (fetched_case["url"], fetched_case["title"], fetched_case["priority"], fetched_case["label"], fetched_case["assignee"], send_notification, False, fetched_case["id"])
-        cursor.execute("UPDATE case_table SET url = ?, title = ?, priority = ?, label = ?, assignee = ?, notify = ?, already_notified = ? WHERE id = ?", data)
-        cursor.close()
-    else:
-        logger.info("no need to update database")
+    if not send_notification:
+        logger.info("will not send notificaion for this case")
+        
+    cursor = db_conn.cursor()
+    ## ID URL TITLE PRIORITY LABEL ASSIGNEE NOTIFY ALREADY_NOTIFIED
+    data = (fetched_case["url"], fetched_case["title"], fetched_case["priority"], fetched_case["label"], fetched_case["assignee"], send_notification, False, fetched_case["id"])
+    cursor.execute("UPDATE case_table SET url = ?, title = ?, priority = ?, label = ?, assignee = ?, notify = ?, already_notified = ? WHERE id = ?", data)
+    cursor.close()
     
 def send_notification_to_slack(fetched_case_list):
     print(">> send_notification_to_slack")
@@ -120,9 +120,10 @@ def send_notification_to_slack(fetched_case_list):
     db_conn.row_factory = dict_factory
     cursor = db_conn.cursor()
     
+    #cursor.execute("SELECT * FROM case_table WHERE notify = 1 AND already_notified = 0")
     cursor.execute("SELECT * FROM case_table WHERE notify = 1")
     notification_list = cursor.fetchall()
-    cursor.close()
+
     print(notification_list)
     logger.info("{} cases to be sent...".format(len(notification_list)))
     
@@ -132,6 +133,14 @@ def send_notification_to_slack(fetched_case_list):
         logger.info("sent: {}".format(case))
     
     logger.info("sending notification completed")
+    
+    # set "notify" as False
+    for case in notification_list:
+        ## ID URL TITLE PRIORITY LABEL ASSIGNEE NOTIFY ALREADY_NOTIFIED
+        data = (case["url"], case["title"], case["priority"], case["label"], case["assignee"], False, False, case["id"])
+        cursor.execute("UPDATE case_table SET url = ?, title = ?, priority = ?, label = ?, assignee = ?, notify = ?, already_notified = ? WHERE id = ?", data)
+        
+    cursor.close()
     db_conn.commit()
     db_conn.close()
     
