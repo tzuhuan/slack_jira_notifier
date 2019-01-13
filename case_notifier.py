@@ -20,7 +20,7 @@ def fetch_jira_cases():
     id_list = [i for i in range(TESTING_CASE_ID_RANGE)]
     random.shuffle(id_list)
     
-    for i in range(random.randint(1, 1)):
+    for i in range(random.randint(0, 3)):
         case = {}
         case_id = "{}".format(id_list[i])
         case["id"] = case_id
@@ -145,11 +145,13 @@ def send_notification_to_slack(fetched_case_list):
     db_conn.close()
     
 def main():
+    logger.info(">> CaseNotifier STARTS!!")
     fetched_case_list = fetch_jira_cases()
     print(fetched_case_list)
     
     update_database(fetched_case_list)
     send_notification_to_slack(fetched_case_list)
+    logger.info("<< CaseNotifier ENDS!!")
         
 
 if __name__ == '__main__':
