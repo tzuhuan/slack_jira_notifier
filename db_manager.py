@@ -2,15 +2,20 @@ import sqlite3
 import os
 import random
 
+import tracelog
+
 DB_FILEPATH = "case.db"
 
 CASE_PRIORITY = ["P0", "P1", "P2", "P2", "P3", "P3"]
 CASE_LABEL = ["DSA", "DSM", "DSR", "DSAAS", ""]
 
+logger = tracelog.getLogger()
+
 ## case_table
-## ID PRIORITY LABEL NOTIFY ALREADY_NOTIFIED
+## ID URL TITLE PRIORITY LABEL ASSIGNEE NOTIFY ALREADY_NOTIFIED
 
 def create_db(db_path):
+    logger.info("create db %s", db_path)
     need_to_create_table = False
     
     if not os.path.exists(db_path):
@@ -22,8 +27,11 @@ def create_db(db_path):
     if need_to_create_table:
         c.execute('''CREATE TABLE case_table (
                          id TEXT PRIMARY KEY NOT NULL,
+                         url TEXT NOT NULL,
+                         title TEXT NOT NULL,
                          priority TEXT NOT NULL,
                          label TEXT NOT NULL,
+                         assignee TEXT NOT NULL,
                          notify Boolean NOT NULL,
                          already_notified Boolean NOT NULL);
         ''')
