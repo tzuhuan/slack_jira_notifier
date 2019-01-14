@@ -5,6 +5,7 @@ import os
 import db_manager
 from slack_notifier import SlackNotifier
 import tracelog
+import case_model as CASE
 
 DB_FILE_PATH = "case.db"
 TESTING_CASE_ID_RANGE = 10
@@ -20,15 +21,15 @@ def fetch_jira_cases():
     id_list = [i for i in range(TESTING_CASE_ID_RANGE)]
     random.shuffle(id_list)
     
-    for i in range(random.randint(0, 3)):
+    for i in range(random.randint(1, 1)):
         case = {}
         case_id = "{}".format(id_list[i])
-        case["id"] = case_id
-        case["title"] = "Windows Server BSOD"
-        case["url"] = "https://www.google.com.tw"
-        case["priority"] = db_manager.get_random_priority()
-        case["label"] = db_manager.get_random_label()
-        case["assignee"] = "patrick_tang"
+        case[CASE.ID] = case_id
+        case[CASE.SUMMARY] = "Windows Server BSOD"
+        case[CASE.URL] = "https://www.google.com.tw"
+        case[CASE.PRIORITY] = db_manager.get_random_priority()
+        case[CASE.PROBLEM_DOMAIN] = db_manager.get_random_label()
+        case[CASE.SEG_OWNER] = "patrick_tang"
         case_list.append(case)
     
     return case_list
@@ -73,7 +74,7 @@ def find_existing_case(existing_case_list, fetched_case):
     print(">> find_existing_case")
     
     for existing_case in existing_case_list:
-        if existing_case["id"] == fetched_case["id"]:
+        if existing_case[CASE.ID] == fetched_case[CASE.ID]:
             print("found existing case {}".format(existing_case))
             logger.info("found existing case {}".format(existing_case))
             return existing_case
@@ -85,12 +86,11 @@ def insert_case_into_db(db_conn, fetched_case):
     
     send_notification = False
     
-    if fetched_case["label"] != "":
+    if fetched_case[CASE.PROBLEM_DOMAIN] != "":
         send_notification = True
     
     cursor = db_conn.cursor()
-    ## ID URL TITLE PRIORITY LABEL ASSIGNEE NOTIFY ALREADY_NOTIFIED
-    data = (fetched_case["id"], fetched_case["url"], fetched_case["title"], fetched_case["priority"], fetched_case["label"], fetched_case["assignee"], send_notification, False)
+    data = (fetched_case[CASE.ID], fetched_case[CASE.URL], fetched_case[CASE.SUMMARY], fetched_case[CASE.PRIORITY], fetched_case[CASE.PROBLEM_DOMAIN], fetched_case[CASE.SEG_OWNER], send_notification, False)
     cursor.execute("INSERT INTO case_table VALUES (?, ?, ?, ?, ?, ?, ?, ?)", data)
     cursor.close()
     logger.info("insert case {}".format(fetched_case))
@@ -99,9 +99,8 @@ def update_existing_case(db_conn, existing_case, fetched_case):
     print(">> update_existing_case")
     
     send_notification = False
-    if (fetched_case["label"] != "") and (existing_case["label"] != fetched_case["label"]):
-        print("Label changed '{}' -> '{}'".format(existing_case["label"], fetched_case["label"]))
-        logger.info("label changed '{}' -> '{}'".format(existing_case["label"], fetched_case["label"]))
+    if (fetched_case[CASE.PROBLEM_DOMAIN] != "") and (existing_case[CASE.PROBLEM_DOMAIN] != fetched_case[CASE.PROBLEM_DOMAIN]):
+        logger.info("Problem domain changed '{}' -> '{}'".format(existing_case[CASE.PROBLEM_DOMAIN], fetched_case[CASE.PROBLEM_DOMAIN]))
         send_notification = True
     
     if not send_notification:
@@ -109,8 +108,8 @@ def update_existing_case(db_conn, existing_case, fetched_case):
         
     cursor = db_conn.cursor()
     ## ID URL TITLE PRIORITY LABEL ASSIGNEE NOTIFY ALREADY_NOTIFIED
-    data = (fetched_case["url"], fetched_case["title"], fetched_case["priority"], fetched_case["label"], fetched_case["assignee"], send_notification, False, fetched_case["id"])
-    cursor.execute("UPDATE case_table SET url = ?, title = ?, priority = ?, label = ?, assignee = ?, notify = ?, already_notified = ? WHERE id = ?", data)
+    data = (fetched_case[CASE.URL], fetched_case[CASE.SUMMARY], fetched_case[CASE.PRIORITY], fetched_case[CASE.PROBLEM_DOMAIN], fetched_case[CASE.SEG_OWNER], send_notification, False, fetched_case["id"])
+    cursor.execute("UPDATE case_table SET url = ?, summary = ?, Priority = ?, 'Problem domain' = ?, 'SEG Owner' = ?, notify = ?, already_notified = ? WHERE id = ?", data)
     cursor.close()
     
 def send_notification_to_slack(fetched_case_list):
@@ -137,8 +136,8 @@ def send_notification_to_slack(fetched_case_list):
     # set "notify" as False
     for case in notification_list:
         ## ID URL TITLE PRIORITY LABEL ASSIGNEE NOTIFY ALREADY_NOTIFIED
-        data = (case["url"], case["title"], case["priority"], case["label"], case["assignee"], False, False, case["id"])
-        cursor.execute("UPDATE case_table SET url = ?, title = ?, priority = ?, label = ?, assignee = ?, notify = ?, already_notified = ? WHERE id = ?", data)
+        data = (case[CASE.URL], case[CASE.SUMMARY], case[CASE.PRIORITY], case[CASE.PROBLEM_DOMAIN], case[CASE.SEG_OWNER], False, False, case[CASE.ID])
+        cursor.execute("UPDATE case_table SET url = ?, summary = ?, Priority = ?, 'Problem domain' = ?, 'SEG Owner' = ?, notify = ?, already_notified = ? WHERE id = ?", data)
         
     cursor.close()
     db_conn.commit()

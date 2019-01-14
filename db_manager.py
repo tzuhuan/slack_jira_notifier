@@ -3,6 +3,7 @@ import os
 import random
 
 import tracelog
+import case_model as CASE
 
 DB_FILEPATH = "case.db"
 
@@ -10,9 +11,6 @@ CASE_PRIORITY = ["P0", "P1", "P2", "P2", "P3", "P3"]
 CASE_LABEL = ["DSA", "DSM", "DSR", "DSAAS", ""]
 
 logger = tracelog.getLogger()
-
-## case_table
-## ID URL TITLE PRIORITY LABEL ASSIGNEE NOTIFY ALREADY_NOTIFIED
 
 def create_db(db_path):
     logger.info("create db %s", db_path)
@@ -25,16 +23,15 @@ def create_db(db_path):
     c = db.cursor()
     
     if need_to_create_table:
-        c.execute('''CREATE TABLE case_table (
-                         id TEXT PRIMARY KEY NOT NULL,
-                         url TEXT NOT NULL,
-                         title TEXT NOT NULL,
-                         priority TEXT NOT NULL,
-                         label TEXT NOT NULL,
-                         assignee TEXT NOT NULL,
-                         notify Boolean NOT NULL,
-                         already_notified Boolean NOT NULL);
-        ''')
+        c.execute("CREATE TABLE case_table ( \
+                         {} TEXT PRIMARY KEY NOT NULL, \
+                         {} TEXT NOT NULL, \
+                         {} TEXT NOT NULL, \
+                         {} TEXT NOT NULL, \
+                         '{}' TEXT NOT NULL, \
+                         '{}' TEXT NOT NULL, \
+                         {} Boolean NOT NULL, \
+                         {} Boolean NOT NULL)".format(CASE.ID, CASE.URL, CASE.SUMMARY, CASE.PRIORITY, CASE.PROBLEM_DOMAIN, CASE.SEG_OWNER, CASE.NOTIFY, CASE.ALREADY_NOTIFIED))
         db.commit()
         
     return db

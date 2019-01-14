@@ -6,6 +6,7 @@ import time
 import random
 from queue import Queue
 import os
+import case_model as CASE
 
 g_webhook_url = os.environ["slack_channel_webhook_url"]
 
@@ -30,12 +31,12 @@ class SlackNotifier:
         
     def build_message(self, case):    
         message = {}
-        message["text"] = "<{}|{}> *{}*\n>Priority: {}\n>Label: {}\n>Assignee: {}".format(case["url"],
-                                                                                          case["id"],
-                                                                                          case["title"],
-                                                                                          case["priority"],
-                                                                                          case["label"],
-                                                                                          case["assignee"])
+        message["text"] = "<{}|{}> *{}*\n>Priority: {}\n>Label: {}\n>Assignee: {}".format(case[CASE.URL],
+                                                                                          case[CASE.ID],
+                                                                                          case[CASE.SUMMARY],
+                                                                                          case[CASE.PRIORITY],
+                                                                                          case[CASE.PROBLEM_DOMAIN],
+                                                                                          case[CASE.SEG_OWNER])
     
         return message    
 

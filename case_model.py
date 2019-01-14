@@ -1,0 +1,8 @@
+ID = "id"
+URL = "url"
+SUMMARY = "summary"
+PRIORITY = "Priority"
+PROBLEM_DOMAIN = "Problem domain"
+SEG_OWNER = "SEG Owner"
+NOTIFY = "notify"
+ALREADY_NOTIFIED = "already_notified"
