@@ -12,6 +12,12 @@ CASE_LABEL = ["DSA", "DSM", "DSR", "DSAAS", ""]
 
 logger = tracelog.getLogger()
 
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d 
+
 def create_db(db_path):
     logger.info("create db %s", db_path)
     need_to_create_table = False
@@ -19,8 +25,8 @@ def create_db(db_path):
     if not os.path.exists(db_path):
         need_to_create_table = True
         
-    db = sqlite3.connect(db_path)
-    c = db.cursor()
+    db_conn = sqlite3.connect(db_path)
+    c = db_conn.cursor()
     
     if need_to_create_table:
         c.execute("CREATE TABLE case_table ( \
@@ -32,9 +38,11 @@ def create_db(db_path):
                          '{}' TEXT NOT NULL, \
                          {} Boolean NOT NULL, \
                          {} Boolean NOT NULL)".format(CASE.ID, CASE.URL, CASE.SUMMARY, CASE.PRIORITY, CASE.PROBLEM_DOMAIN, CASE.SEG_OWNER, CASE.NOTIFY, CASE.ALREADY_NOTIFIED))
+        c.close()
         db.commit()
-        
-    return db
+    
+    db_conn.row_factory = dict_factory
+    return db_conn
 
 def get_random_priority():
     return CASE_PRIORITY[random.randint(0, len(CASE_PRIORITY) - 1)]

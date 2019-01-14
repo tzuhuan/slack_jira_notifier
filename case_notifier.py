@@ -32,19 +32,12 @@ def fetch_jira_cases():
         case[CASE.SEG_OWNER] = "patrick_tang"
         case_list.append(case)
     
-    return case_list
- 
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d    
+    return case_list   
  
 def update_database(fetched_case_list):
     print(">> update_database")
     
     db_conn = db_manager.create_db(DB_FILE_PATH)
-    db_conn.row_factory = dict_factory
     cursor = db_conn.cursor()
     
     cursor.execute("SELECT * FROM case_table")
@@ -116,7 +109,6 @@ def send_notification_to_slack(fetched_case_list):
     print(">> send_notification_to_slack")
     
     db_conn = db_manager.create_db(DB_FILE_PATH)
-    db_conn.row_factory = dict_factory
     cursor = db_conn.cursor()
     
     #cursor.execute("SELECT * FROM case_table WHERE notify = 1 AND already_notified = 0")
@@ -147,7 +139,7 @@ def main():
     logger.info(">> CaseNotifier STARTS!!")
     fetched_case_list = fetch_jira_cases()
     print(fetched_case_list)
-    
+
     update_database(fetched_case_list)
     send_notification_to_slack(fetched_case_list)
     logger.info("<< CaseNotifier ENDS!!")
