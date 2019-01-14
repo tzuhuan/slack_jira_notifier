@@ -5,7 +5,7 @@ import os
 import db_manager
 from slack_notifier import SlackNotifier
 import tracelog
-import case_model as CASE
+import case_attribute as CASE
 
 DB_FILE_PATH = "case.db"
 TESTING_CASE_ID_RANGE = 10

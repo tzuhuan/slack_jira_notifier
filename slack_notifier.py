@@ -6,7 +6,7 @@ import time
 import random
 from queue import Queue
 import os
-import case_model as CASE
+import case_attribute as CASE
 
 g_webhook_url = os.environ["slack_channel_webhook_url"]
 

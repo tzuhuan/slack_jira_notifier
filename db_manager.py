@@ -3,7 +3,7 @@ import os
 import random
 
 import tracelog
-import case_model as CASE
+import case_attribute as CASE
 
 DB_FILEPATH = "case.db"
 
