@@ -39,7 +39,7 @@ def create_db(db_path):
                          {} Boolean NOT NULL, \
                          {} Boolean NOT NULL)".format(CASE.ID, CASE.URL, CASE.SUMMARY, CASE.PRIORITY, CASE.PROBLEM_DOMAIN, CASE.SEG_OWNER, CASE.NOTIFY, CASE.ALREADY_NOTIFIED))
         c.close()
-        db.commit()
+        db_conn.commit()
     
     db_conn.row_factory = dict_factory
     return db_conn

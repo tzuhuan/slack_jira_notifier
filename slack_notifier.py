@@ -31,7 +31,7 @@ class SlackNotifier:
         
     def build_message(self, case):    
         message = {}
-        message["text"] = "<{}|{}> *{}*\n>Priority: {}\n>Label: {}\n>Assignee: {}".format(case[CASE.URL],
+        message["text"] = "<{}|{}> *{}*\n>Priority: {}\n>Problem domain: {}\n>SEG Owner: {}".format(case[CASE.URL],
                                                                                           case[CASE.ID],
                                                                                           case[CASE.SUMMARY],
                                                                                           case[CASE.PRIORITY],
